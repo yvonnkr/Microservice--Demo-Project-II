@@ -1,6 +1,7 @@
 package com.yvolabs.companyservice;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -11,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/companies")
 @RequiredArgsConstructor
+@Slf4j
 public class CompanyController {
 
     private final CompanyService companyService;
@@ -31,6 +33,7 @@ public class CompanyController {
 
     @GetMapping
     public ResponseEntity<List<Company>> getAllCompanies() {
+        log.debug("TESTING DEBUG LEVEL ACTUATOR LOGGING");
         return ResponseEntity.ok(companyService.getAllCompanies());
 
     }
