@@ -3,20 +3,29 @@ package com.yvolabs.jobservice.impl;
 import com.yvolabs.jobservice.Job;
 import com.yvolabs.jobservice.JobRepository;
 import com.yvolabs.jobservice.JobService;
+import com.yvolabs.jobservice.dto.JobWithCompanyDTO;
+import com.yvolabs.jobservice.external.Company;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
+
     private final JobRepository jobRepository;
 
     @Override
-    public List<Job> findAll() {
-        return jobRepository.findAll();
+    public List<JobWithCompanyDTO> findAll() {
+        List<Job> jobs = jobRepository.findAll();
+
+        return jobs.stream()
+                .map(this::convertToDto).collect(Collectors.toList());
+
     }
 
     @Override
@@ -53,6 +62,18 @@ public class JobServiceImpl implements JobService {
             return true;
         }
         return false;
+    }
+
+    private JobWithCompanyDTO convertToDto(Job job) {
+        //External API call
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "http://localhost:8081/companies/" + job.getCompanyId();
+        Company company = restTemplate.getForObject(url, Company.class);
+
+        return JobWithCompanyDTO.builder()
+                .job(job)
+                .company(company)
+                .build();
     }
 
 }
