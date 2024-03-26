@@ -3,15 +3,21 @@ package com.yvolabs.jobservice.impl;
 import com.yvolabs.jobservice.Job;
 import com.yvolabs.jobservice.JobRepository;
 import com.yvolabs.jobservice.JobService;
-import com.yvolabs.jobservice.dto.JobWithCompanyDTO;
+import com.yvolabs.jobservice.dto.JobDto;
 import com.yvolabs.jobservice.external.Company;
+import com.yvolabs.jobservice.external.Review;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.yvolabs.jobservice.mapper.JobMapper.mapToJobWithCompanyDto;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +27,7 @@ public class JobServiceImpl implements JobService {
     private final RestTemplate restTemplate;
 
     @Override
-    public List<JobWithCompanyDTO> findAll() {
+    public List<JobDto> findAll() {
         List<Job> jobs = jobRepository.findAll();
 
         return jobs.stream()
@@ -35,7 +41,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public JobWithCompanyDTO getJobById(Long id) {
+    public JobDto getJobById(Long id) {
         Job job = jobRepository.findById(id).orElse(null);
         assert job != null;
         return convertToDto(job);
@@ -68,15 +74,27 @@ public class JobServiceImpl implements JobService {
         return false;
     }
 
-    private JobWithCompanyDTO convertToDto(Job job) {
-        //External API call
-        String url = "http://COMPANY-SERVICE:8081/companies/" + job.getCompanyId();
-        Company company = restTemplate.getForObject(url, Company.class);
+    private JobDto convertToDto(Job job) {
+        //External API calls
+        String companyUrl = "http://COMPANY-SERVICE:8081/companies/" + job.getCompanyId();
+        Company company = restTemplate.getForObject(companyUrl, Company.class);
 
-        return JobWithCompanyDTO.builder()
-                .job(job)
-                .company(company)
-                .build();
+        assert company != null;
+        String reviewUrl = "http://REVIEW-SERVICE:8083/reviews?companyId=" + company.getId();
+
+        ResponseEntity<List<Review>> reviewsResponse = restTemplate.exchange(
+                reviewUrl,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                }
+        );
+
+        List<Review> reviews = reviewsResponse.getBody();
+
+
+        return mapToJobWithCompanyDto(job, company, reviews);
+
     }
 
 }

@@ -1,15 +1,15 @@
 package com.yvolabs.jobservice;
 
-import com.yvolabs.jobservice.dto.JobWithCompanyDTO;
+import com.yvolabs.jobservice.dto.JobDto;
 
 import java.util.List;
 
 public interface JobService {
-    List<JobWithCompanyDTO> findAll();
+    List<JobDto> findAll();
 
     void createJob(Job job);
 
-    JobWithCompanyDTO getJobById(Long id);
+    JobDto getJobById(Long id);
 
     boolean deleteJobById(Long id);
 

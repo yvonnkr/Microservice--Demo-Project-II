@@ -1,6 +1,6 @@
 package com.yvolabs.jobservice;
 
-import com.yvolabs.jobservice.dto.JobWithCompanyDTO;
+import com.yvolabs.jobservice.dto.JobDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,7 @@ public class JobController {
 
 
     @GetMapping
-    public ResponseEntity<List<JobWithCompanyDTO>> findAll() {
+    public ResponseEntity<List<JobDto>> findAll() {
         return ResponseEntity.ok(jobService.findAll());
     }
 
@@ -27,10 +27,10 @@ public class JobController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<JobWithCompanyDTO> getJobById(@PathVariable Long id) {
-        JobWithCompanyDTO jobWithCompanyDTO = jobService.getJobById(id);
-        if (jobWithCompanyDTO != null)
-            return new ResponseEntity<>(jobWithCompanyDTO, HttpStatus.OK);
+    public ResponseEntity<JobDto> getJobById(@PathVariable Long id) {
+        JobDto jobDto = jobService.getJobById(id);
+        if (jobDto != null)
+            return new ResponseEntity<>(jobDto, HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
