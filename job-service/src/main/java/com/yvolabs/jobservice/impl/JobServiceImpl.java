@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class JobServiceImpl implements JobService {
 
     private final JobRepository jobRepository;
+    private final RestTemplate restTemplate;
 
     @Override
     public List<JobWithCompanyDTO> findAll() {
@@ -66,8 +67,7 @@ public class JobServiceImpl implements JobService {
 
     private JobWithCompanyDTO convertToDto(Job job) {
         //External API call
-        RestTemplate restTemplate = new RestTemplate();
-        String url = "http://localhost:8081/companies/" + job.getCompanyId();
+        String url = "http://COMPANY-SERVICE:8081/companies/" + job.getCompanyId();
         Company company = restTemplate.getForObject(url, Company.class);
 
         return JobWithCompanyDTO.builder()
