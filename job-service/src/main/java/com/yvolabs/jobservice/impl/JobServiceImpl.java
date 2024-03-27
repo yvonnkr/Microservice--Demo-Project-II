@@ -3,13 +3,12 @@ package com.yvolabs.jobservice.impl;
 import com.yvolabs.jobservice.Job;
 import com.yvolabs.jobservice.JobRepository;
 import com.yvolabs.jobservice.JobService;
+import com.yvolabs.jobservice.clients.CompanyClient;
+import com.yvolabs.jobservice.clients.ReviewClient;
 import com.yvolabs.jobservice.dto.JobDto;
 import com.yvolabs.jobservice.external.Company;
 import com.yvolabs.jobservice.external.Review;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,7 +23,8 @@ import static com.yvolabs.jobservice.mapper.JobMapper.mapToJobWithCompanyDto;
 public class JobServiceImpl implements JobService {
 
     private final JobRepository jobRepository;
-    private final RestTemplate restTemplate;
+    private final CompanyClient companyClient;
+    private final ReviewClient reviewClient;
 
     @Override
     public List<JobDto> findAll() {
@@ -76,22 +76,9 @@ public class JobServiceImpl implements JobService {
 
     private JobDto convertToDto(Job job) {
         //External API calls
-        String companyUrl = "http://COMPANY-SERVICE:8081/companies/" + job.getCompanyId();
-        Company company = restTemplate.getForObject(companyUrl, Company.class);
+        Company company = companyClient.getCompany(job.getCompanyId());
 
-        assert company != null;
-        String reviewUrl = "http://REVIEW-SERVICE:8083/reviews?companyId=" + company.getId();
-
-        ResponseEntity<List<Review>> reviewsResponse = restTemplate.exchange(
-                reviewUrl,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {
-                }
-        );
-
-        List<Review> reviews = reviewsResponse.getBody();
-
+        List<Review> reviews = reviewClient.getReviews(company.getId());
 
         return mapToJobWithCompanyDto(job, company, reviews);
 
