@@ -8,6 +8,7 @@ import com.yvolabs.jobservice.clients.ReviewClient;
 import com.yvolabs.jobservice.dto.JobDto;
 import com.yvolabs.jobservice.external.Company;
 import com.yvolabs.jobservice.external.Review;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -27,6 +28,7 @@ public class JobServiceImpl implements JobService {
     private final ReviewClient reviewClient;
 
     @Override
+    @CircuitBreaker(name = "companyBreaker")
     public List<JobDto> findAll() {
         List<Job> jobs = jobRepository.findAll();
 
