@@ -9,6 +9,7 @@ import com.yvolabs.jobservice.dto.JobDto;
 import com.yvolabs.jobservice.external.Company;
 import com.yvolabs.jobservice.external.Review;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,8 @@ public class JobServiceImpl implements JobService {
 
     @Override
 //    @CircuitBreaker(name = "companyBreaker", fallbackMethod = "companyBreakerFallback")
-    @Retry(name = "companyBreaker", fallbackMethod = "companyBreakerFallback")
+//    @Retry(name = "companyBreaker", fallbackMethod = "companyBreakerFallback")
+    @RateLimiter(name = "companyBreaker", fallbackMethod = "companyBreakerFallback")
     public List<JobDto> findAll() {
         log.info("Retry Attempts Count: {}", ++attempt);
         List<Job> jobs = jobRepository.findAll();
