@@ -9,10 +9,13 @@ import com.yvolabs.jobservice.dto.JobDto;
 import com.yvolabs.jobservice.external.Company;
 import com.yvolabs.jobservice.external.Review;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,19 +24,29 @@ import static com.yvolabs.jobservice.mapper.JobMapper.mapToJobWithCompanyDto;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class JobServiceImpl implements JobService {
 
     private final JobRepository jobRepository;
     private final CompanyClient companyClient;
     private final ReviewClient reviewClient;
+    int attempt = 0;
 
     @Override
-    @CircuitBreaker(name = "companyBreaker")
+//    @CircuitBreaker(name = "companyBreaker", fallbackMethod = "companyBreakerFallback")
+    @Retry(name = "companyBreaker", fallbackMethod = "companyBreakerFallback")
     public List<JobDto> findAll() {
+        log.info("Retry Attempts Count: {}", ++attempt);
         List<Job> jobs = jobRepository.findAll();
-
         return jobs.stream()
                 .map(this::convertToDto).collect(Collectors.toList());
+
+    }
+
+    public List<String> companyBreakerFallback(Exception e){
+        ArrayList<String> list = new ArrayList<>();
+        list.add("Dummy fall back message in event of circuit breaker is open.");
+        return list;
 
     }
 
