@@ -3,7 +3,9 @@ package com.yvolabs.companyservice.impl;
 import com.yvolabs.companyservice.Company;
 import com.yvolabs.companyservice.CompanyRepository;
 import com.yvolabs.companyservice.CompanyService;
+import com.yvolabs.companyservice.clients.ReviewClient;
 import com.yvolabs.companyservice.dto.ReviewMessage;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.Optional;
 public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final ReviewClient reviewClient;
 
     @Override
     public List<Company> getAllCompanies() {
@@ -58,7 +61,13 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public void updateCompanyRating(ReviewMessage reviewMessage) {
         log.info("Review Message Consumed: {}", reviewMessage.toString());
-        //logic todo
+
+        Company company = companyRepository.findById(reviewMessage.getCompanyId())
+                .orElseThrow(() -> new NotFoundException("Company not found with id: " + reviewMessage.getCompanyId()));
+
+        Double averageReviewRating = reviewClient.getAverageReviewRating(reviewMessage.getCompanyId());
+        company.setRating(averageReviewRating);
+        companyRepository.save(company);
 
     }
 }
