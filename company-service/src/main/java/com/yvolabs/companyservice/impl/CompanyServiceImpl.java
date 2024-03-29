@@ -3,7 +3,9 @@ package com.yvolabs.companyservice.impl;
 import com.yvolabs.companyservice.Company;
 import com.yvolabs.companyservice.CompanyRepository;
 import com.yvolabs.companyservice.CompanyService;
+import com.yvolabs.companyservice.dto.ReviewMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepository companyRepository;
@@ -49,6 +52,13 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public void deleteCompany(Long id) {
         companyRepository.deleteById(id);
+
+    }
+
+    @Override
+    public void updateCompanyRating(ReviewMessage reviewMessage) {
+        log.info("Review Message Consumed: {}", reviewMessage.toString());
+        //logic todo
 
     }
 }

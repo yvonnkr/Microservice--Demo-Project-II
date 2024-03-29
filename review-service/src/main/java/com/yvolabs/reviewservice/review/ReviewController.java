@@ -1,5 +1,6 @@
 package com.yvolabs.reviewservice.review;
 
+import com.yvolabs.reviewservice.review.messaging.ReviewMessageProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
+    private final ReviewMessageProducer reviewMessageProducer;
 
 
     @GetMapping
@@ -24,10 +26,12 @@ public class ReviewController {
     public ResponseEntity<String> addReview(@RequestParam Long companyId,
                                             @RequestBody Review review) {
         boolean isReviewSaved = reviewService.addReview(companyId, review);
-        if (isReviewSaved)
-            return new ResponseEntity<>("Review Added Successfully",
-                    HttpStatus.OK);
-        else
+        if (isReviewSaved) {
+            //publish message to rabbitMQ
+            reviewMessageProducer.sendMessage(review);
+
+            return new ResponseEntity<>("Review Added Successfully", HttpStatus.OK);
+        } else
             return new ResponseEntity<>("Review Not Saved",
                     HttpStatus.NOT_FOUND);
     }

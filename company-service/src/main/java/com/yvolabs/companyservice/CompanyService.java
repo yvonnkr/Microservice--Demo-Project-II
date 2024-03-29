@@ -1,5 +1,7 @@
 package com.yvolabs.companyservice;
 
+import com.yvolabs.companyservice.dto.ReviewMessage;
+
 import java.util.List;
 
 public interface CompanyService {
@@ -12,4 +14,6 @@ public interface CompanyService {
     Company getCompanyById(Long id);
 
     void deleteCompany(Long id);
+
+    void updateCompanyRating(ReviewMessage reviewMessage);
 }
